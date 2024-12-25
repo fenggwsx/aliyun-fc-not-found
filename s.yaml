@@ -1,0 +1,15 @@
+edition: 3.0.0
+name: aliyun-fc-not-found
+
+resources:
+  aliyun-fc-not-found:
+    component: fc3 
+    props:
+      region: ${env('DEPLOY_REGION', 'cn-hongkong')}
+      functionName: ${env('FUNCTION_NAME', 'not-found')}
+      runtime: go1
+      memorySize: 128
+      diskSize: 512
+      code: build
+      handler: main
+      timeout: 3

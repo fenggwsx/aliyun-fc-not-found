@@ -1,0 +1,33 @@
+name: Deployment 🚀
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        required: true
+        type: string
+      functionName:
+        default: not-found
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup golang environment
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Install dependencies
+        run: GO111MODULE=on go mod tidy
+      - name: Build the project
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/main main.go
+      - name: Install deployment tool
+        run: npm install @serverless-devs/s -g
+      - name: Configure access key
+        run: s config add --AccessKeyID ${{ secrets.ALIYUN_ACCESS_KEY_ID }} --AccessKeySecret ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }} -a default -f
+      - name: Deploy to cloud
+        run: DEPLOY_REGION=${{ inputs.region }} FUNCTION_NAME=${{ inputs.functionName }} s deploy -y --use-local
